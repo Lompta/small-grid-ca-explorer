@@ -1,0 +1,11 @@
+6x6: 239123150 orbit representatives (Burnside: 239123150) in 60.0s
+rule 203 {0,1,3,6,7}: longest run 1717
+1 start(s) up to symmetry (288 raw configurations), ending in 1 distinct cycle(s)
+
+start hex 5bd1e52f (tail 1701), direct check 1717:
+#.....
+##.##.
+..#.##
+.####.
+..#.#.
+####.#

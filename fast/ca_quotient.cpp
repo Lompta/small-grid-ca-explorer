@@ -491,6 +491,66 @@ int main(int argc, char** argv) {
     wk.nxt.resize(M);
     wk.indeg = new std::atomic<u32>[M];
 
+    if (argc >= 4 && !strcmp(argv[2], "--count")) {
+        // How many starts (up to symmetry) reach the rule's longest run, and
+        // how soon do their paths merge?
+        u32 rule = (u32)strtoul(argv[3], nullptr, 0);
+        RuleResult r = solve_rule(rule, reps, index, wk);
+        printf("rule %u %s: longest run %llu\n", rule, rule_str(rule).c_str(), (unsigned long long)r.best_run);
+        // Distance to cycle (d) and cycle id (cyc) for every orbit, by memoized forward walks.
+        u32* d = wk.cur.data();
+        u32* cyc = wk.nxt.data();
+        for (size_t i = 0; i < M; i++) {
+            bool on_cycle = wk.indeg[i].load(std::memory_order_relaxed) != 0;
+            d[i] = on_cycle ? 0 : UNSET;
+            cyc[i] = on_cycle ? wk.h[i] : UNSET;
+        }
+        std::vector<u32> stack;
+        for (size_t i = 0; i < M; i++) {
+            u32 u = (u32)i;
+            while (d[u] == UNSET) { stack.push_back(u); u = wk.succ[u]; }
+            while (!stack.empty()) {
+                u32 v = stack.back(); stack.pop_back();
+                d[v] = d[wk.succ[v]] + 1;
+                cyc[v] = cyc[wk.succ[v]];
+            }
+        }
+        std::vector<u32> best;
+        std::vector<u32> best_cycles;
+        for (size_t i = 0; i < M; i++)
+            if (d[i] + wk.cycle_len[cyc[i]] == r.best_run) {
+                best.push_back((u32)i);
+                if (std::find(best_cycles.begin(), best_cycles.end(), cyc[i]) == best_cycles.end())
+                    best_cycles.push_back(cyc[i]);
+            }
+        // Raw configuration count: orbit size = group order / stabilizer size.
+        u64 configs = 0;
+        for (u32 i : best) {
+            u64 x = reps[i];
+            int stab = 0;
+            for (int g = 0; g < 8; g++)
+                for (int s = 0; s < N; s++)
+                    for (int j = 0; j < N; j++) stab += hrot(vrot(dih(g, x), s), j) == x;
+            configs += (u64)(8 * N * N / stab);
+        }
+        printf("%zu start(s) up to symmetry (%llu raw configurations), ending in %zu distinct cycle(s)\n",
+               best.size(), (unsigned long long)configs, best_cycles.size());
+        for (u32 i : best)
+            printf("\nstart hex %llx (tail %u), direct check %llu:\n%s", (unsigned long long)reps[i], d[i],
+                   (unsigned long long)direct_run_length(reps[i], rule), grid_str(reps[i]).c_str());
+        // Follow all best starts forward together and report when they merge.
+        std::vector<u32> S = best;
+        for (u32 k = 1; S.size() > 1; k++) {
+            for (auto& u : S) u = wk.succ[u];
+            std::sort(S.begin(), S.end());
+            S.erase(std::unique(S.begin(), S.end()), S.end());
+            if (S.size() > 1 && k > r.best_run) break;
+            printf("after step %u: %zu distinct path(s) up to symmetry\n", k, S.size());
+            if (S.size() == 1) break;
+        }
+        return 0;
+    }
+
     if (argc >= 4 && !strcmp(argv[2], "--reconstruct")) {
         u32 rule = (u32)strtoul(argv[3], nullptr, 0);
         RuleResult r = solve_rule(rule, reps, index, wk);

@@ -32,6 +32,17 @@ The record run itself, starting from
 is listed state by state in `longest_6x6_rule_203.txt`. Its length was checked by
 plain simulation, both in the C++ program and in a separate few-line Python script.
 
+**The 6x6 record is unique.** Only one symmetry class of start grids reaches 1,717.
+That class contains 288 grids: every shift, rotation and reflection of the grid
+above. The inverted copies under the partner rule {0,3,4,6} are the only other
+grids that reach 1,717, and no other rule pair comes close.
+
+For comparison, 5x5 has 4 symmetry classes of record starts (800 grids), and all
+of them merge into the same path after one step. 4x4 has 8 classes (1,024 grids),
+which merge into a single path after 3 steps. In every case only one rule pair
+reaches the maximum.
+(`ca_quotient N --count RULE` prints these counts; see `count_6x6_rule_203.txt`.)
+
 Runner-up rules for 6x6: {2,3,5,8} gives 1,648; {0,2,3,5,8} gives 1,373; and
 {0,1,3,6,7,8} gives 1,329.
 
@@ -87,7 +98,8 @@ build.bat
 ca_quotient.exe 5                    # all rules for 5x5 (~1 s)
 ca_quotient.exe 6                    # all rules for 6x6 (~1.5 h, ~8 GB RAM)
 ca_quotient.exe 6 100 120            # only rules with mask 100..120
-ca_quotient.exe 6 --reconstruct 205  # rebuild and verify the best run for one rule
+ca_quotient.exe 6 --reconstruct 203  # rebuild and verify the best run for one rule
+ca_quotient.exe 6 --count 203        # how many starts tie for that rule's best run
 ```
 
 Rule masks: bit k set means a cell with k live neighbours is on next step. For
