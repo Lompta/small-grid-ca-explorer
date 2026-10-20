@@ -107,3 +107,28 @@ example, {0,2,3,6,7} = 1+4+8+64+128 = 205.
 
 On any compiler with OpenMP it should build with something like
 `g++ -O2 -fopenmp -mavx2 ca_quotient.cpp`.
+
+## 7x7: sampling and cost estimates (2026-10)
+
+`sample_runs.cpp` runs random starts under every rule and measures each run exactly.
+Its output gives the brute-force cost and a lower bound on the answer. Checked on 6x6:
+200,000 samples per rule found 1,703, against the exact answer of 1,717, with the same
+winning rule.
+
+For 7x7, 20,000 samples per rule (`sample_7x7.csv`) found a run of **545,752** unique
+states, from rule {2,3,5,7} starting at hex `19d630e284a4e`. This was re-checked
+independently with numpy. So the 7x7 answer is **at least 545,752**, more than 300 times
+the 6x6 record. The worst rules average about 40,000 steps per start, so plain brute force
+needs about 3.5e18 steps:
+
+| Hardware | Speed (measured / assumed) | Plain brute force |
+|---|---|---|
+| Laptop CPU, 16 threads | 4e8 steps/s (measured) | ~270 years |
+| Laptop RTX 3060 | 2e10 steps/s (measured, `gpu_bench_7x7.cu`) | ~5 years |
+| Rented H100s | ~2e11 steps/s each (assumed) | ~5,000 GPU-hours, ~$10-15k |
+
+Storing the whole graph, as the 6x6 solver does, would take about 7 TB per rule.
+A realistic path is a memoised search using "distinguished points". Only a sparse
+sample of states, plus every cycle state, is remembered in a hash table. Each start
+is then walked only until it reaches a remembered state, not to the end of its run.
+That could cut the work 10-50x, but it is a substantial engineering project.
