@@ -132,3 +132,9 @@ A realistic path is a memoised search using "distinguished points". Only a spars
 sample of states, plus every cycle state, is remembered in a hash table. Each start
 is then walked only until it reaches a remembered state, not to the end of its run.
 That could cut the work 10-50x, but it is a substantial engineering project.
+
+## 8x8 sampling
+
+2,000 samples per rule (`sample_8x8.csv`) found a run of **5,064,397** unique states under
+rule {0,1,3,6,7}, the same rule that wins 6x6. It starts at hex `d5c3e041c7eb59a9` and was
+re-checked independently with numpy. Plain brute force would need about 1.1e24 steps.
