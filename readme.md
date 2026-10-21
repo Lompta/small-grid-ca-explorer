@@ -1,3 +1,8 @@
+### Intro
+This document was written in 2025 to help Cursor orient to the project, such that it could in turn help me solve the 5x5 case. This effort succeeded: the answer is 916. Yesterday, as of this writing on 10/19, Claude Code oriented to the problem using a draft blog post on [my blog](https://justismills.substack.com), and created the code in fast/ to solve the 6x6 case. This also succeeded: the answer is 1717.
+
+The rest of this document is a snapshot from 2025. It was written by me. Other docs in the repo are Claude generated in this latest 2026 tranche of work, so take these with grains of salt. For a more comprehensive and perhaps clearer explanation of the problem, with lots of diagrams and examples, see my blog.
+
 ### Overview
 The objective of this project is to study finite cellular automata. Specifically, wraparound small-grid cellular automata in a torus. So, the cell above any cell on the top row is the cell on the bottom row directly below it, and the cell to the right of any cell on the rightmost column is the cell on the leftmost column directly to the left of it.
 
